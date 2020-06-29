@@ -1229,6 +1229,38 @@ bool newrelic_accept_distributed_trace_payload_httpsafe(
     const char* payload,
     const char* transport_type);
 
+
+
+
+
+/*!
+ * @brief The internal linking metadata type.
+ */
+typedef struct _newrelic_linking_metadata_t {
+    // trace_id identifies the entire distributed trace.  This field is empty
+    // if distributed tracing is disabled.
+    const char* trace_id;
+    // span_id identifies the currently active segment.  This field is empty
+    // if distributed tracing is disabled or the transaction is not sampled.
+    const char* span_id;
+    // entity_name is the Application name as set on the newrelic.Config.  If
+    // multiple application names are specified, only the first is returned.
+    const char* entity_name;
+    // entity_type is the type of this entity and is always the string
+    // "SERVICE".
+    const char* entity_type;
+    // entity_guid is the unique identifier for this entity.
+    const char* entity_guid;
+    // host_name is the hostname this entity is running on.
+    const char* host_name;
+} newrelic_linking_metadata_t;
+
+/**
+ * @brief Returns the fields needed to link data to a trace or entity.
+ * @see newrelic_create_link_metadata()
+ */
+newrelic_linking_metadata_t* newrelic_create_link_metadata( const newrelic_txn_t* txn,const newrelic_app_t* app);
+
 /**
  * @brief Set a transaction name
  *

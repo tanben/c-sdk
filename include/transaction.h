@@ -5,9 +5,11 @@
  */
 #ifndef LIBNEWRELIC_TRANSACTION_H
 #define LIBNEWRELIC_TRANSACTION_H
-
+#include <stdio.h>
 #include "nr_txn.h"
 #include "util_threads.h"
+#include "util_base64.h"
+
 
 /*!
  * @brief The internal transaction type.

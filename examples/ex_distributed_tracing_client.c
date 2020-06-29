@@ -44,6 +44,8 @@ int main(void) {
   /* Enable distributed tracing */
   config->distributed_tracing.enabled = true;
 
+  newrelic_configure_log("client.log",NEWRELIC_LOG_DEBUG );
+
   /* Wait up to 10 seconds for the SDK to connect to the daemon */
   newrelic_app_t* app = newrelic_create_app(config, 10000);
   newrelic_destroy_app_config(&config);
@@ -76,6 +78,15 @@ int main(void) {
 
     if (payload) {
       fprintf(request_file, "%s", payload);
+      newrelic_linking_metadata_t *link_metadata=  newrelic_create_link_metadata(txn, app);
+      printf("timestamp= %ld\n", (long)ceil(nr_get_time()/1000));
+      printf("\n newrelic_linking_metadata_t: trace_id= %s span_id= %s entity_name= %s entity_type= %s entity_guid= %s host_name= %s\n",
+        link_metadata->trace_id,
+        link_metadata->span_id,
+        link_metadata->entity_name,
+        link_metadata->entity_type,
+        link_metadata->entity_guid,
+        link_metadata->host_name);
       free(payload);
     }
 

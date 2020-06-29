@@ -182,3 +182,33 @@ bool newrelic_set_transaction_name(newrelic_txn_t* transaction,
   nrl_error(NRL_API, "unable to name transaction");
   return false;
 }
+
+
+newrelic_linking_metadata_t* newrelic_create_link_metadata(const newrelic_txn_t* txn, const newrelic_app_t* app) {
+
+  if (NULL == txn || NULL == app) {
+    return NULL;
+  }
+  const nr_distributed_trace_t*  distributed_trace = txn->txn->distributed_trace;
+
+  newrelic_linking_metadata_t* link_metadata = nr_malloc(sizeof(newrelic_linking_metadata_t));;
+  char* app_id=nr_strdup( nr_distributed_trace_get_app_id(distributed_trace));
+  char* account_id=  nr_strdup( nr_distributed_trace_get_account_id(distributed_trace));
+
+  link_metadata->trace_id =nr_distributed_trace_get_trace_id((const nr_distributed_trace_t*)distributed_trace);
+
+
+  link_metadata->span_id = (const char*) nr_txn_get_current_span_id(  txn->txn);
+
+  link_metadata->entity_name=  nr_app_get_entity_name(app->app);
+  link_metadata->entity_type= nr_strdup( nr_app_get_entity_type(app->app));
+  link_metadata->host_name= nr_strdup(nr_app_get_host_name(app->app));
+
+  int ovrLen= (strlen(account_id) + strlen("|APM") +strlen("|APPLICATION") + strlen(app_id)) ;
+  char* guidStr=  (char*)nr_malloc( ovrLen * 4  / 3 + 4);
+  sprintf(guidStr, "%s|APM|APPLICATION|%s", account_id, app_id);
+  int guidEncLen=0;
+
+  link_metadata->entity_guid = nr_b64_encode(guidStr, nr_strlen(guidStr), &guidEncLen);
+  return link_metadata;
+}
